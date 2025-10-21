@@ -1,7 +1,8 @@
 #include "csv.h"
+#include "options.h"
 #include <argp.h>
 
-const char *argp_programm_version = "Import_Export_1.0";
+const char *argp_program_version = "Import_Export_1.0";
 const char doc[] = "Read csv Files and also can export them";
 char args_doc[] = "";
 
