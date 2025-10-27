@@ -31,12 +31,19 @@ int parse_cmdline(int argc, char **argv)
 }
 int main (int argc, char **argv)
 {
+    
     parse_cmdline(argc, argv);
     csv_Table table;
-    create_table(&table, 5, 3);
+    // hier übergabe mit argp -- spaeter
+    FILE *import_csvfile = open_file("/home/kuss/backup/prpr-tabellen-import-export/src/test_data_basic.csv", "r");
+    count_rows_cols(&table,import_csvfile);
+    create_table(&table);
+    csv_import(&table,import_csvfile);
+    csv_export(&table, "/home/kuss/backup/prpr-tabellen-import-export/src/export_test.csv");
     //csv_set_cell(&table,0,0,"killme");
-    csv_import(&table);
     csv_print(&table);
     csv_free(&table);
+    
+
 
 }
