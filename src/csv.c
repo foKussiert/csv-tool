@@ -9,14 +9,26 @@ FILE* open_file(char *file_name, char *rights)
 
    return file;
 }
-void csv_export(csv_Table *table, char *export_file_name)
+int csv_export(csv_Table *table, char *export_file_name)
 {
     FILE *exportfile = fopen(export_file_name, "w");
     if (!exportfile) 
     {
         printf("Datei konnte nicht geoeffnet werden\n");
-        return;
+        return 1;
     }
+    for (int j = 0; j < table->cols; j++)
+    {
+        if (table->header[j])
+        {   
+            fprintf(exportfile, "%s", table->header[j]);
+        }
+        if (j < table->cols - 1)
+        {
+            fprintf(exportfile, ",");
+        }
+    }
+    fprintf(exportfile, "\n");
     for (int i = 0; i < table->rows; i++)
     {
         for (int j = 0; j < table->cols; j++)
@@ -34,6 +46,7 @@ void csv_export(csv_Table *table, char *export_file_name)
         fprintf(exportfile, "\n");
     }
     fclose(exportfile);
+    return 0;
 }
 
 void count_rows_cols(csv_Table *table, FILE *file)
@@ -68,6 +81,7 @@ void create_table(csv_Table *table)
     //1 ebene, zeiger auf arrays(sind ja auch zeiger) muss ich aber
     //row könnte table->rows, noch testen
     table->data = malloc(sizeof(char**)*table->rows);
+    
     for (int i = 0; i < table->rows; i++)
     {
         //reservierung von arrays also 2 ebene
@@ -78,11 +92,17 @@ void create_table(csv_Table *table)
         
             }
     }
+    //header
+    table->header = malloc(sizeof(char*)*table->cols);
+    for (int z = 0; z < table->cols; z++)
+    {
+        table->header[z] = NULL;
+    }
 }
 
 void csv_free(csv_Table *table)
 {
-    for (int k = 0; k<table->rows; k++)
+    for (int k = 0; k < table->rows; k++)
     {
         for (int l = 0; l<table->cols;l++ )
         {
@@ -91,6 +111,12 @@ void csv_free(csv_Table *table)
         free(table->data[k]);
     }
     free(table->data);
+    
+    for (int z = 0; z < table->cols; z++)
+    {
+        free(table->header[z]);
+    }
+    free(table->header);
 
 }
 void csv_print(csv_Table *table)
@@ -136,10 +162,26 @@ int csv_import(csv_Table *table, FILE *file)
         return 1;
     }
     int row = 0;
+    int col = 0;
+    if (!fgets(buffer, sizeof(buffer), file)) 
+    {
+        printf("Fehler beim Lesen der Header-Zeile oder leere Datei.\n");
+        fclose(file);
+    return 1;
+    }
 
+    buffer[strcspn(buffer, "\n")] = '\0';
+    token = strtok(buffer,","); 
+    while(token!= NULL)
+        {                
+            //reservierung für die values also theoretisch 3 Ebene eig ist es das malloc(strlen() + 1); strcpy(...);
+            table->header[col] = strdup(token);
+            token = strtok(NULL,",");
+            col++;          
+        }
     while(fgets(buffer, sizeof(buffer), file))
     {
-        int col = 0;
+        col = 0;
         //Das \n durch \0 ersetzen, wichtig für den export dann -.-
         buffer[strcspn(buffer, "\n")] = '\0';
         token = strtok(buffer,",");

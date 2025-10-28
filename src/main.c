@@ -9,7 +9,7 @@ char args_doc[] = "";
 //Optionen fuer die Ausfuehrung der Anwendung
 struct argp_option options[] = 
 {
- {"debug", 'd', 0,0, "Prints debug text"},
+{"debug", 'd', 0,0, "Prints debug text"},
     {0}
 };
 
@@ -20,6 +20,11 @@ error_t parse_options(int key, char *arg, struct argp_state *state)
         case 'd':
             printf("Debug Option\n");
             break;
+        case 'f':
+            printf("Filepath to import\n");
+            break;
+        case 'e':
+            printf("Name of exportfile - .csv\n");
     }
     return 0;
 }
@@ -31,19 +36,16 @@ int parse_cmdline(int argc, char **argv)
 }
 int main (int argc, char **argv)
 {
-    
     parse_cmdline(argc, argv);
     csv_Table table;
-    // hier übergabe mit argp -- spaeter
+    // hier ubergabe mit argp -- spaeter
     FILE *import_csvfile = open_file("/home/kuss/backup/prpr-tabellen-import-export/src/test_data_basic.csv", "r");
     count_rows_cols(&table,import_csvfile);
     create_table(&table);
     csv_import(&table,import_csvfile);
+    // auch ubergabe -- spaeter
     csv_export(&table, "/home/kuss/backup/prpr-tabellen-import-export/src/export_test.csv");
     //csv_set_cell(&table,0,0,"killme");
     csv_print(&table);
     csv_free(&table);
-    
-
-
 }
