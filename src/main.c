@@ -36,16 +36,21 @@ int parse_cmdline(int argc, char **argv)
 }
 int main (int argc, char **argv)
 {
+
     parse_cmdline(argc, argv);
     csv_Table table;
-    // hier ubergabe mit argp -- spaeter
+    //TODO hier ubergabe mit argp -- spaeter
     FILE *import_csvfile = open_file("/home/kuss/backup/prpr-tabellen-import-export/src/test_data_basic.csv", "r");
     count_rows_cols(&table,import_csvfile);
     create_table(&table);
     csv_import(&table,import_csvfile);
-    // auch ubergabe -- spaeter
-    csv_export(&table, "/home/kuss/backup/prpr-tabellen-import-export/src/export_test.csv");
+    //TODO auch ubergabe -- spaeter
+    //csv_edit_cell(&table,2,2,"test");
+    //csv_copy_cell(&table, 1, 0, 2, 0);
     //csv_set_cell(&table,0,0,"killme");
+    //csv_empty_cell(&table,3,1);
+    //TODO auch ubergabe -- spaeter
+    csv_export(&table, "/home/kuss/backup/prpr-tabellen-import-export/src/export_test.csv");
     csv_print(&table);
     csv_free(&table);
 }

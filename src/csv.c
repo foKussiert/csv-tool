@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+//Zeile(row) Spalte (col)
+
+//              Spalte col(0) Spalte col(1)
+//Zeile(row)0
+//Zeile(row)1
 FILE* open_file(char *file_name, char *rights)
 {
    FILE *file = fopen(file_name, rights);
@@ -79,7 +84,6 @@ void create_table(csv_Table *table)
 {
 
     //1 ebene, zeiger auf arrays(sind ja auch zeiger) muss ich aber
-    //row könnte table->rows, noch testen
     table->data = malloc(sizeof(char**)*table->rows);
     
     for (int i = 0; i < table->rows; i++)
@@ -92,7 +96,7 @@ void create_table(csv_Table *table)
         
             }
     }
-    //header
+//header
     table->header = malloc(sizeof(char*)*table->cols);
     for (int z = 0; z < table->cols; z++)
     {
@@ -152,6 +156,40 @@ void csv_set_cell(csv_Table *table, size_t row, size_t col, const char* value)
             }
     }
 }
+void csv_edit_cell(csv_Table *table, size_t row, size_t col, const char* value)
+{
+    table->data[row][col] = strdup(value);
+}
+void csv_copy_cell(csv_Table *table, size_t srcRow, size_t srcCol, size_t dstRow, size_t dstCol)
+{
+    //TODOhier hat strdup funktioniert, aber das muss ich mir nochmal anschauen, weil in meinem kopf eig doppelte speicherreservierung, aber vllt muss der es ja nochmal neu machen, so klappts auf jedenf all
+    table->data[srcRow][srcCol] = strdup(table->data[dstRow][dstCol]);
+}
+void csv_copy_row(csv_Table *table, size_t row)
+{
+
+    for (int i = 0; i < table->cols ; i++)
+    {
+        
+    }
+
+}
+void csv_copy_col(csv_Table *table, size_t col)
+{
+
+}
+void csv_empty_cell(csv_Table *table, size_t row, size_t col)
+{
+    table->data[row][col] = NULL;
+}
+void csv_empty_row(csv_Table *table, size_t row)
+{
+    
+}
+void csv_empty_col(csv_Table *table, size_t col)
+{
+
+}
 int csv_import(csv_Table *table, FILE *file)
 {
     char buffer[1000];
@@ -167,7 +205,7 @@ int csv_import(csv_Table *table, FILE *file)
     {
         printf("Fehler beim Lesen der Header-Zeile oder leere Datei.\n");
         fclose(file);
-    return 1;
+        return 1;
     }
 
     buffer[strcspn(buffer, "\n")] = '\0';
