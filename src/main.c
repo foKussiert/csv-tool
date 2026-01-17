@@ -268,12 +268,13 @@ int main (int argc, char **argv)
     };
     parse_cmdline(argc, argv, &cfg);
     csv_Table table;
-    table.has_header = 0;
+    table.has_header = cfg.has_header;
     FILE *import_csvfile = open_file((char*)cfg.import_path, "r");
     count_rows_cols(&table,import_csvfile);
     create_table(&table);
     csv_import(&table,import_csvfile);
     detect_col_types(&table);   
+
     if(cfg.do_copy_cell)
     {
         csv_copy_cell(&table, cfg.source_row_for_cell_to_copy, cfg.source_col_for_cell_to_copy, cfg.dst_row_for_cell_to_copy, cfg.dst_col_for_cell_to_copy);
