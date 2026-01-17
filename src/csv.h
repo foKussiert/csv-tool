@@ -18,6 +18,7 @@ typedef struct
     char **header;
     char ***data;
     CellType *col_types;
+    int has_header;
 } csv_Table;
 typedef FILE *CSVFILE;
 
@@ -47,4 +48,7 @@ void csv_set_quote(char q);
 char *csv_get_cell_by_name(csv_Table *table, size_t row, const char *header);
 int csv_find_col_index(csv_Table *table, const char *name);
 void csv_edit_cell_by_name(csv_Table *table, size_t row, char* header, char* value);
+void csv_write_cell_export(FILE *file, char *value);
+int csv_cell_needs_quotes(char *value);
+
 #endif
