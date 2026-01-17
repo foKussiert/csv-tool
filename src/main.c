@@ -245,8 +245,8 @@ int main (int argc, char **argv)
     //TODO import/export gerade fest, aber ich glaub das lass ich als default
     arg_Configs cfg = 
     {
-        .import_path = "/home/kuss/backup/prpr-tabellen-import-export/src/test_data_basic.csv",
-        .export_path = "/home/kuss/backup/prpr-tabellen-import-export/src/export_test.csv",
+        .import_path = "/data/home/ayk36245/prpr2_0/prpr-tabellen-import-export/src/test_data_basic.csv",
+        .export_path = "/data/home/ayk36245/prpr2_0/prpr-tabellen-import-export/src/export_test.csv",
         .do_print = 0,
         .do_add_row = 0,
         .do_add_col = 0,
