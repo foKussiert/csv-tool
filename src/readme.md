@@ -1,56 +1,99 @@
-# CSV Tabellen Import / Export
+#  CSV-Tool – Tabellen importieren, bearbeiten, exportieren
+
+**Kommandozeilen-Tool in C zum Einlesen, Bearbeiten und Exportieren von CSV-Dateien.**
+
+Studienprojekt an der OTH Regensburg. Der CSV-Parser ist komplett selbst geschrieben, ohne externe Bibliothek, mit dynamischer Speicherverwaltung (`malloc`/`realloc`/`free`).
+
+---
+
 ## Features
 
-- Import von CSV-Dateien
-- Unterstützung von Delimiter- und Quote-Zeichen
-- Optionaler Header (erste Zeile als Spaltennamen)
-- Zugriff auf Zellen per Index oder Spaltenname
-- Tabellenmanipulation:
-  - Zeilen hinzufügen / löschen
-  - Spalten hinzufügen / löschen
-  - Zeilen / Spalten kopieren
-- Export der Tabelle in eine CSV-Datei
-- Konsolenbasierte Ausgabe der Tabelle
+- **Eigener CSV-Parser** mit frei wählbarem Trennzeichen (`,` `;` …) und Quote-Zeichen
+- Korrekte Behandlung von Sonderfällen: Trennzeichen innerhalb von Anführungszeichen, escapte Quotes (`""`), leere Zellen, unterschiedlich lange Zeilen
+- Optionale Kopfzeile (Header) und Zugriff auf Spalten per Index oder Spaltenname
+- **Automatische Typerkennung** pro Spalte: leer, Ganzzahl, Kommazahl oder Text
+- Tabelle bearbeiten: Zeilen und Spalten hinzufügen, löschen und kopieren, einzelne Zellen kopieren
+- Export zurück in eine CSV-Datei, Werte werden dabei bei Bedarf automatisch wieder in Quotes gesetzt
+- Kommandozeilen-Optionen mit `argp` inklusive `--help` und Eingabeprüfung
 
-## Wichtige Optionen 
-| Option                 | Beschreibung                      |
-| ---------------------- | --------------------------------- |
-| `-f <datei>`           | CSV-Datei importieren             |
-| `-e <datei>`           | Tabelle als CSV exportieren       |
-| `-p`                   | Tabelle auf der Konsole ausgeben  |
-| `-D <char>`            | Delimiter setzen (z. B. `;`)      |
-| `-Q <char>`            | Quote-Zeichen setzen (z. B. `"`)  |
-| `--no-header`          | CSV ohne Header verarbeiten       |
-| `--add-row`            | Leere Zeile hinzufügen            |
-| `--add-col <name>`     | Neue Spalte mit Header hinzufügen |
-| `--delete-row <index>` | Zeile löschen (0-basiert)         |
-| `--delete-col <index>` | Spalte löschen (0-basiert)        |
-| `--copy-row SRC->DST`   | Zeile SRC nach DST kopieren       |
-| `--copy-col SRC->DST`   | Spalte SRC nach DST kopieren      |
-| `--copy-cell A,B,C,D`     | Zelle (A,B) nach (C,D) kopieren (0-basiert)       |
+## Beispiel
 
-## Anwendungsbeispiele:
-CSV einlesen und ausgeben:
+**Eingabe** (`beispiel.csv`):
+```
+Name;Age;City
+Ali;30;Boston
+Bob;25;New York
+Charlie;40;"Los Angeles; CA"
+```
 
-./csvprog -f tmp.csv -p
+**Aufruf:**
+```bash
+./csvprog -f beispiel.csv -D ";" -e ausgabe.csv -p
+```
 
+**Ausgabe:**
+```
+Spalte 0: Typ = 3
+Spalte 1: Typ = 1
+Spalte 2: Typ = 3
+delimiter ist ;
+0. Name     1. Age  2. City
+0. Ali      1. 30   2. Boston
+0. Bob      1. 25   2. New York
+0. Charlie  1. 40   2. Los Angeles; CA
+rows=3, cols=3
+```
+Das Semikolon in `"Los Angeles; CA"` wird richtig als Teil des Werts erkannt und nicht als Trennzeichen. Spalte 1 wird als Ganzzahl erkannt (Typ 1), die anderen als Text (Typ 3).
 
-CSV mit Semikolon und Quotes:
+**Zeile löschen, Spalte hinzufügen und exportieren:**
+```bash
+./csvprog -f beispiel.csv -D ";" --delete-row 1 --add-col=Land -e ergebnis.csv
+```
+```
+Name;Age;City;Land
+Ali;30;Boston;
+Charlie;40;"Los Angeles; CA";
+```
 
-./csvprog -f tmp.csv -D ";" -Q '"' -p
+## Kompilieren
 
+Benötigt wird ein C-Compiler unter **Linux** (oder unter Windows über WSL), da `argp` und `getline` Teil der GNU C Library sind.
 
-Zeile löschen und exportieren:
+```bash
+gcc -o csvprog main.c csv.c
+```
 
-./csvprog -f tmp.csv --delete-row 2 -e output.csv
+## Optionen
 
+| Option | Beschreibung |
+|---|---|
+| `-f <datei>` | CSV-Datei importieren |
+| `-e <datei>` | Tabelle als CSV exportieren |
+| `-p` | Tabelle auf der Konsole ausgeben |
+| `-D <zeichen>` | Trennzeichen setzen (Standard: `,`) |
+| `-Q <zeichen>` | Quote-Zeichen setzen (Standard: `"`) |
+| `--no-header` | CSV ohne Kopfzeile verarbeiten |
+| `--add-row` | Leere Zeile anhängen |
+| `--add-col=<name>` | Neue Spalte mit Namen anhängen |
+| `--delete-row <index>` | Zeile löschen |
+| `--delete-col <index>` | Spalte löschen |
+| `--copy-row SRC,DST` | Zeile SRC nach DST kopieren |
+| `--copy-col SRC,DST` | Spalte SRC nach DST kopieren |
+| `--copy-cell A,B,C,D` | Zelle (Zeile A, Spalte B) nach (Zeile C, Spalte D) kopieren |
+| `--help` | Alle Optionen anzeigen |
 
-Spalte hinzufügen:
+Alle Indizes sind 0-basiert, gezählt wird ohne die Kopfzeile. Beim Aufruf sollten immer `-f` und `-e` angegeben werden.
 
-./csvprog --add-col="test" -p -D ";"
+## Aufbau
 
+| Datei | Inhalt |
+|---|---|
+| `csv.h` | Datentypen (`csv_Table`, `CellType`) und Funktionsdeklarationen |
+| `csv.c` | Parser (`my_tokenizer`), Import/Export, Typerkennung, Tabellenoperationen |
+| `main.c` | Auswertung der Kommandozeilen-Optionen mit `argp` |
 
-Einzelne Zelle kopieren und exportieren:
+Die Tabelle wird als dynamisches zweidimensionales Array von Strings gespeichert (`char ***data`). Beim Löschen oder Hinzufügen von Zeilen und Spalten wird der Speicher per `realloc` angepasst.
 
-./csvprog -f tmp.csv --copy-cell 0,0,2,1 -e output.csv -p -D ";"
+## Technik
 
+C · GNU C Library (`argp`, `getline`) · Autotools (`Makefile.am`) · Git
